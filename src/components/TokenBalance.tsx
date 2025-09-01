@@ -7,6 +7,11 @@ interface TokenBalanceProps {
   tokenAddress: string;
 }
 
+interface TokenBalanceData {
+  mint: string;
+  uiAmount: number;
+}
+
 export function TokenBalance({ tokenAddress }: TokenBalanceProps) {
   const { wallets } = useSolanaWallets();
   const [balance, setBalance] = useState<number | null>(null);
@@ -29,7 +34,7 @@ export function TokenBalance({ tokenAddress }: TokenBalanceProps) {
         if (response.ok) {
           const data = await response.json();
           if (data.balances) {
-            const tokenBalance = data.balances.find((b: any) => b.mint === tokenAddress);
+            const tokenBalance = data.balances.find((b: TokenBalanceData) => b.mint === tokenAddress);
             setBalance(tokenBalance ? tokenBalance.uiAmount : 0);
           }
         }

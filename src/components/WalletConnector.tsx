@@ -8,8 +8,8 @@ export function WalletConnector() {
     onError: (error) => {
       console.error('Login error:', error);
     },
-    onComplete: (user) => {
-      console.log('User logged in:', user);
+    onComplete: () => {
+      // User successfully logged in
     }
   });
 
@@ -42,7 +42,7 @@ export function WalletConnector() {
       </button>
       
       <p className="text-xs text-gray-500 text-center">
-        New to crypto? We'll create a wallet for you automatically
+        New to crypto? We&apos;ll create a wallet for you automatically
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { Wallet, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export function Portfolio() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     if (!wallets.length) return;
 
     try {
@@ -43,11 +43,11 @@ export function Portfolio() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [wallets]);
 
   useEffect(() => {
     fetchBalances();
-  }, [wallets]);
+  }, [wallets, fetchBalances]);
 
   if (loading) {
     return (

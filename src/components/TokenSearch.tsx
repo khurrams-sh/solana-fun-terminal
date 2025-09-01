@@ -9,6 +9,14 @@ interface TokenSearchProps {
   onTokenSelect: (token: Token) => void;
 }
 
+interface JupiterToken {
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  logoURI?: string;
+}
+
 export function TokenSearch({ selectedToken, onTokenSelect }: TokenSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Token[]>([]);
@@ -27,13 +35,13 @@ export function TokenSearch({ selectedToken, onTokenSelect }: TokenSearchProps) 
       
       if (response.ok) {
         const tokens = await response.json();
-        const filtered = tokens.filter((token: any) => 
+        const filtered = tokens.filter((token: JupiterToken) =>
           token.symbol.toLowerCase().includes(query.toLowerCase()) ||
           token.name.toLowerCase().includes(query.toLowerCase()) ||
           token.address.toLowerCase().includes(query.toLowerCase())
         ).slice(0, 10);
-        
-        setSearchResults(filtered.map((token: any) => ({
+
+        setSearchResults(filtered.map((token: JupiterToken) => ({
           address: token.address,
           symbol: token.symbol,
           name: token.name,

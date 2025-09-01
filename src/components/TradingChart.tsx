@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Token, MarketData } from './TradingTerminal';
 
 interface TradingChartProps {
@@ -27,7 +27,7 @@ export function TradingChart({ token, onMarketDataUpdate }: TradingChartProps) {
   const wsRef = useRef<WebSocket | null>(null);
 
   // Fetch historical OHLCV data from Birdeye
-  const fetchOHLCVData = async () => {
+  const fetchOHLCVData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -42,7 +42,14 @@ export function TradingChart({ token, onMarketDataUpdate }: TradingChartProps) {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data?.items) {
-          const formattedData = data.data.items.map((item: any) => ({
+          const formattedData = data.data.items.map((item: {
+            unixTime: number;
+            o: number;
+            h: number;
+            l: number;
+            c: number;
+            v: number;
+          }) => ({
             time: item.unixTime * 1000,
             open: item.o,
             high: item.h,
@@ -74,10 +81,10 @@ export function TradingChart({ token, onMarketDataUpdate }: TradingChartProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token.address, onMarketDataUpdate, priceChange]);
 
   // Subscribe to real-time price updates
-  const subscribeToPrice = () => {
+  const subscribeToPrice = useCallback(() => {
     if (wsRef.current) {
       wsRef.current.close();
     }
@@ -123,7 +130,7 @@ export function TradingChart({ token, onMarketDataUpdate }: TradingChartProps) {
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
-  };
+  }, [token.address, onMarketDataUpdate]);
 
   useEffect(() => {
     fetchOHLCVData();
@@ -134,7 +141,7 @@ export function TradingChart({ token, onMarketDataUpdate }: TradingChartProps) {
         wsRef.current.close();
       }
     };
-  }, [token.address]);
+  }, [token.address, fetchOHLCVData, subscribeToPrice]);
 
   // Simple candlestick chart implementation
   const renderChart = () => {

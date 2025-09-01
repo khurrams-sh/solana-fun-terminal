@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, Wallet, Search, Star, BarChart3 } from 'lucide-react';
+import { TrendingUp, Wallet, Search } from 'lucide-react';
 import { Token } from './TradingTerminal';
 import { TokenPrice } from './TokenPrice';
 

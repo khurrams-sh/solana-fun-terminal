@@ -3,8 +3,16 @@
 import { useSendTransaction, useSolanaWallets } from '@privy-io/react-auth/solana';
 import { Transaction } from '@solana/web3.js';
 
+interface OrderData {
+  transaction: string;
+  router?: string;
+  outAmount?: string;
+  priceImpact?: number;
+  prioritizationFeeLamports?: number;
+}
+
 interface SwapExecutorProps {
-  orderData: any;
+  orderData: OrderData;
   onSuccess: () => void;
   onError: (error: Error) => void;
 }
@@ -26,12 +34,12 @@ export function SwapExecutor({ orderData, onSuccess, onError }: SwapExecutorProp
       const transaction = Transaction.from(Buffer.from(orderData.transaction, 'base64'));
 
       // Send the transaction using Privy
-      const signature = await sendTransaction({
+      await sendTransaction({
         transaction,
         address: wallet.address,
       });
 
-      console.log('Transaction sent:', signature);
+      // Transaction sent successfully
       onSuccess();
     } catch (error) {
       console.error('Error executing swap:', error);

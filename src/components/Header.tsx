@@ -2,7 +2,7 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 
 export function Header() {
   const { user, logout } = usePrivy();

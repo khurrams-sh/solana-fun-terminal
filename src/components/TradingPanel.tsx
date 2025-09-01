@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSolanaWallets, useSendTransaction } from '@privy-io/react-auth/solana';
 import { Transaction } from '@solana/web3.js';
 import { ArrowUpDown, Zap, Settings } from 'lucide-react';
@@ -19,7 +19,13 @@ export function TradingPanel({ selectedToken, marketData }: TradingPanelProps) {
   const [outputAmount, setOutputAmount] = useState('');
   const [slippage, setSlippage] = useState(0.5);
   const [isSwapping, setIsSwapping] = useState(false);
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<{
+    transaction: string;
+    router?: string;
+    outAmount?: string;
+    priceImpact?: number;
+    prioritizationFeeLamports?: number;
+  } | null>(null);
   const [swapDirection, setSwapDirection] = useState<'buy' | 'sell'>('buy');
 
   const inputToken = swapDirection === 'buy' 
@@ -31,12 +37,12 @@ export function TradingPanel({ selectedToken, marketData }: TradingPanelProps) {
     : { address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', symbol: 'USDC', decimals: 6 };
 
   // Get quote from Jupiter Ultra API
-  const getQuote = async () => {
+  const getQuote = useCallback(async () => {
     if (!amount || !wallets.length) return;
 
     try {
       const amountInSmallestUnit = Math.floor(parseFloat(amount) * Math.pow(10, inputToken.decimals));
-      
+
       const response = await fetch(
         `https://lite-api.jup.ag/ultra/v1/order?inputMint=${inputToken.address}&outputMint=${outputToken.address}&amount=${amountInSmallestUnit}&taker=${wallets[0].address}&slippageBps=${Math.floor(slippage * 100)}`
       );
@@ -50,7 +56,7 @@ export function TradingPanel({ selectedToken, marketData }: TradingPanelProps) {
     } catch (error) {
       console.error('Error getting quote:', error);
     }
-  };
+  }, [amount, inputToken.address, inputToken.decimals, outputToken.address, outputToken.decimals, slippage, wallets]);
 
   // Execute swap
   const executeSwap = async () => {
@@ -62,12 +68,12 @@ export function TradingPanel({ selectedToken, marketData }: TradingPanelProps) {
       const transaction = Transaction.from(Buffer.from(orderData.transaction, 'base64'));
 
       // Send the transaction using Privy - it handles signing automatically
-      const signature = await sendTransaction({
+      await sendTransaction({
         transaction,
         address: wallets[0].address,
       });
 
-      console.log('Swap executed with signature:', signature);
+      // Swap executed successfully
       
       // Handle successful swap
       setAmount('');
@@ -88,7 +94,7 @@ export function TradingPanel({ selectedToken, marketData }: TradingPanelProps) {
     }, 500);
 
     return () => clearTimeout(delayedQuote);
-  }, [amount, inputToken.address, outputToken.address, slippage]);
+  }, [amount, inputToken.address, outputToken.address, slippage, getQuote]);
 
   return (
     <div className="h-full bg-gray-900 flex flex-col">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { TradingChart } from './TradingChart';
 import { TradingPanel } from './TradingPanel';
